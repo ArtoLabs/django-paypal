@@ -38,12 +38,11 @@ def ipn(request):
 
     # Avoid the RawPostDataException. See original issue for details:
     # https://github.com/spookylukey/django-paypal/issues/79
-    print("running ipn")
-    print(request.META.get('CONTENT_TYPE', ''))
+
     if not request.META.get('CONTENT_TYPE', '').startswith(
             'application/x-www-form-urlencoded'):
-        #raise AssertionError(CONTENT_TYPE_ERROR)
-        print("AssertionError(CONTENT_TYPE_ERROR)")
+        print(request.META.get('CONTENT_TYPE', ''))
+        raise AssertionError(CONTENT_TYPE_ERROR)
 
     logger.debug("PayPal incoming POST data: %s", request.body)
 
