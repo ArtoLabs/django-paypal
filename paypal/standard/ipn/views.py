@@ -13,7 +13,7 @@ from paypal.standard.ipn.models import PayPalIPN
 from paypal.standard.models import DEFAULT_ENCODING
 from paypal.utils import warn_untested
 
-#logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 CONTENT_TYPE_ERROR = ("Invalid Content-Type - PayPal is only expected to use "
                       "application/x-www-form-urlencoded. If using django's "
@@ -44,7 +44,7 @@ def ipn(request):
         print(request.META.get('CONTENT_TYPE', ''))
         #raise AssertionError(CONTENT_TYPE_ERROR)
 
-    #logger.info("PayPal incoming POST data: %s", request.body)
+    print("PayPal incoming POST data: %s", request.body)
 
     # Clean up the data as PayPal sends some weird values such as "N/A"
     # Also, need to cope with custom encoding, which is stored in the body (!).
@@ -64,6 +64,8 @@ def ipn(request):
         flag = "Invalid form - invalid charset"
 
     if data is not None:
+        print(data)
+        print(dir(data))
         if hasattr(PayPalIPN._meta, 'get_fields'):
             date_fields = [f.attname for f in PayPalIPN._meta.get_fields() if f.__class__.__name__ == 'DateTimeField']
         else:
@@ -81,6 +83,7 @@ def ipn(request):
                 ipn_obj = form.save(commit=False)
             except Exception as e:
                 flag = "Exception while processing. (%s)" % e
+
         else:
             formatted_form_errors = ["{0}: {1}".format(k, ", ".join(v)) for k, v in form.errors.items()]
             flag = "Invalid form. ({0})".format(", ".join(formatted_form_errors))
@@ -88,12 +91,16 @@ def ipn(request):
     if ipn_obj is None:
         ipn_obj = PayPalIPN()
 
+
+
+
     # Set query params and sender's IP address
     ipn_obj.initialize(request)
 
     if flag is not None:
         # We save errors in the flag field
         ipn_obj.set_flag(flag)
+        print(flag)
     else:
         # Secrets should only be used over SSL.
         if request.is_secure() and 'secret' in request.GET:

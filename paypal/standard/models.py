@@ -123,6 +123,8 @@ class PayPalStandardBase(Model):
     mc_shipping = models.DecimalField(max_digits=64, decimal_places=2, default=0, blank=True, null=True)
     memo = models.CharField(max_length=255, blank=True)
     num_cart_items = models.IntegerField(blank=True, default=0, null=True)
+    cart_list_ids = models.CharField(max_length=255, blank=True)
+    cart_list_qtys = models.CharField(max_length=255, blank=True)
     option_name1 = models.CharField(max_length=64, blank=True)
     option_name2 = models.CharField(max_length=64, blank=True)
     option_selection1 = models.CharField(max_length=200, blank=True)
