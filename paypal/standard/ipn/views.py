@@ -20,7 +20,7 @@ CONTENT_TYPE_ERROR = ("Invalid Content-Type - PayPal is only expected to use "
                       "test Client, set `content_type` explicitly")
 
 
-#@ require_POST
+@require_POST
 @csrf_exempt
 def ipn(request):
     """
@@ -36,15 +36,17 @@ def ipn(request):
     flag = None
     ipn_obj = None
 
+    logger.info("PayPal incoming POST data: %s", request.body)
+
     # Avoid the RawPostDataException. See original issue for details:
     # https://github.com/spookylukey/django-paypal/issues/79
 
     if not request.META.get('CONTENT_TYPE', '').startswith(
             'application/x-www-form-urlencoded'):
-        print(request.META.get('CONTENT_TYPE', ''))
-        #raise AssertionError(CONTENT_TYPE_ERROR)
-
-    print("PayPal incoming POST data: %s", request.body)
+        logger.error(str('IPN CONTENT TYPE MISMATCH! '
+                         'Expected application/x-www-form-urlencoded '
+                         'but received {}').format(request.META.get('CONTENT_TYPE', '')))
+        raise AssertionError(CONTENT_TYPE_ERROR)
 
     # Clean up the data as PayPal sends some weird values such as "N/A"
     # Also, need to cope with custom encoding, which is stored in the body (!).
@@ -64,6 +66,8 @@ def ipn(request):
         flag = "Invalid form - invalid charset"
 
     if data is not None:
+        logger.info(data)
+        logger.info(dir(data))
         print(data)
         print(dir(data))
         if hasattr(PayPalIPN._meta, 'get_fields'):
@@ -91,15 +95,13 @@ def ipn(request):
     if ipn_obj is None:
         ipn_obj = PayPalIPN()
 
-
-
-
     # Set query params and sender's IP address
     ipn_obj.initialize(request)
 
     if flag is not None:
         # We save errors in the flag field
         ipn_obj.set_flag(flag)
+        logger.error(flag)
         print(flag)
     else:
         # Secrets should only be used over SSL.
