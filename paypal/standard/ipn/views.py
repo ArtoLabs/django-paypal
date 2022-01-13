@@ -13,8 +13,6 @@ from paypal.standard.ipn.models import PayPalIPN
 from paypal.standard.models import DEFAULT_ENCODING
 from paypal.utils import warn_untested
 
-logger = logging.getLogger(__name__)
-
 CONTENT_TYPE_ERROR = ("Invalid Content-Type - PayPal is only expected to use "
                       "application/x-www-form-urlencoded. If using django's "
                       "test Client, set `content_type` explicitly")
@@ -23,6 +21,7 @@ CONTENT_TYPE_ERROR = ("Invalid Content-Type - PayPal is only expected to use "
 #@require_POST
 @csrf_exempt
 def ipn(request):
+
     """
     PayPal IPN endpoint (notify_url).
     Used by both PayPal Payments Pro and Payments Standard to confirm transactions.
@@ -35,7 +34,7 @@ def ipn(request):
     #       of if checks just to determine if flag is set.
     flag = None
     ipn_obj = None
-
+    logger = logging.getLogger("paypal")
     logger.error("PayPal incoming POST data: %s", request.body)
 
     # Avoid the RawPostDataException. See original issue for details:
@@ -66,8 +65,8 @@ def ipn(request):
         flag = "Invalid form - invalid charset"
 
     if data is not None:
-        logger.error(data)
-        logger.error(dir(data))
+        logger.error(str('{}').format(data))
+        logger.error(str('{}').format(dir(data)))
         print(data)
         print(dir(data))
         if hasattr(PayPalIPN._meta, 'get_fields'):
