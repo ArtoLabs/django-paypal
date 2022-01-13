@@ -68,10 +68,7 @@ def ipn(request):
 
     if data is not None:
 
-        from pathlib import Path
-        home = str(Path.home())
-        total_path = str('{}/paypal_test.log').format(home)
-        file1 = open(total_path, "w")
+        file1 = open('/home/saggi_bottoms/paypal_test.log', "w")
         file1.write(str('{}').format(data))
         file1.write(str('{}').format(dir(data)))
         file1.close()
