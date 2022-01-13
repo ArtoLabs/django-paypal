@@ -36,7 +36,7 @@ def ipn(request):
     flag = None
     ipn_obj = None
 
-    logger.info("PayPal incoming POST data: %s", request.body)
+    logger.error("PayPal incoming POST data: %s", request.body)
 
     # Avoid the RawPostDataException. See original issue for details:
     # https://github.com/spookylukey/django-paypal/issues/79
@@ -66,8 +66,8 @@ def ipn(request):
         flag = "Invalid form - invalid charset"
 
     if data is not None:
-        logger.info(data)
-        logger.info(dir(data))
+        logger.error(data)
+        logger.error(dir(data))
         print(data)
         print(dir(data))
         if hasattr(PayPalIPN._meta, 'get_fields'):
