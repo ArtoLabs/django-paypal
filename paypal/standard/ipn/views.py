@@ -35,7 +35,7 @@ def ipn(request):
     flag = None
     ipn_obj = None
     logger = logging.getLogger("paypal")
-    logger.error("PayPal incoming POST data: %s", request.body)
+    #logger.error("PayPal incoming POST data: %s", request.body)
 
     # Avoid the RawPostDataException. See original issue for details:
     # https://github.com/spookylukey/django-paypal/issues/79
@@ -65,10 +65,8 @@ def ipn(request):
         flag = "Invalid form - invalid charset"
 
     if data is not None:
-        logger.error(str('{}').format(data))
-        logger.error(str('{}').format(dir(data)))
-        print(data)
-        print(dir(data))
+
+
         if hasattr(PayPalIPN._meta, 'get_fields'):
             date_fields = [f.attname for f in PayPalIPN._meta.get_fields() if f.__class__.__name__ == 'DateTimeField']
         else:
@@ -96,6 +94,8 @@ def ipn(request):
 
     # Set query params and sender's IP address
     ipn_obj.initialize(request)
+
+    ipn_obj.data = data
 
     if flag is not None:
         # We save errors in the flag field
