@@ -17,8 +17,10 @@ CONTENT_TYPE_ERROR = ("Invalid Content-Type - PayPal is only expected to use "
                       "application/x-www-form-urlencoded. If using django's "
                       "test Client, set `content_type` explicitly")
 
+logger = logging.getLogger(__name__)
 
-#@require_POST
+
+@require_POST
 @csrf_exempt
 def ipn(request):
 
@@ -34,11 +36,8 @@ def ipn(request):
     #       of if checks just to determine if flag is set.
     flag = None
     ipn_obj = None
-    logger = logging.getLogger("paypal")
-    #logger.error("PayPal incoming POST data: %s", request.body)
 
-
-
+    logger.info("PayPal incoming POST data: %s", request.body)
     # Avoid the RawPostDataException. See original issue for details:
     # https://github.com/spookylukey/django-paypal/issues/79
 
@@ -47,7 +46,7 @@ def ipn(request):
         logger.error(str('IPN CONTENT TYPE MISMATCH! '
                          'Expected application/x-www-form-urlencoded '
                          'but received {}').format(request.META.get('CONTENT_TYPE', '')))
-        #raise AssertionError(CONTENT_TYPE_ERROR)
+        raise AssertionError(CONTENT_TYPE_ERROR)
 
     # Clean up the data as PayPal sends some weird values such as "N/A"
     # Also, need to cope with custom encoding, which is stored in the body (!).
@@ -67,12 +66,6 @@ def ipn(request):
         flag = "Invalid form - invalid charset"
 
     if data is not None:
-
-        file1 = open('/home/saggi_bottoms/paypal_test.log', "w")
-        file1.write(str('{}').format(data))
-        file1.write(str('{}').format(dir(data)))
-        file1.close()
-
         if hasattr(PayPalIPN._meta, 'get_fields'):
             date_fields = [f.attname for f in PayPalIPN._meta.get_fields() if f.__class__.__name__ == 'DateTimeField']
         else:
@@ -105,7 +98,6 @@ def ipn(request):
         # We save errors in the flag field
         ipn_obj.set_flag(flag)
         logger.error(flag)
-        print(flag)
     else:
         # Secrets should only be used over SSL.
         if request.is_secure() and 'secret' in request.GET:
